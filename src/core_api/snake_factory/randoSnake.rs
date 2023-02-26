@@ -1,8 +1,7 @@
-use battlesnake_game_types::types::{Move, NeighborDeterminableGame};
+use battlesnake_game_types::types::{Move, RandomReasonableMovesGame};
 use battlesnake_game_types::wire_representation::Game;
 
 use super::{get_default_aboutme, AboutMe, Snake};
-use rand::seq::SliceRandom;
 pub struct RandoSnake {}
 
 impl Snake for RandoSnake {
@@ -12,12 +11,13 @@ impl Snake for RandoSnake {
     fn start(&self, _game: &Game) {
         println!("STARTED RANDOSNAKE");
     }
-    fn get_move(&self, game: &Game) -> String {
-        let pos = game.you.head;
-        let res: Vec<_> = game.possible_moves(&pos).map(|m| return m.0).collect();
-        println!("{:?}", res);
-        let choice: Move = *res.choose(&mut rand::thread_rng()).unwrap();
-        choice.to_string()
+    fn get_move(&self, game: &Game) -> Box<String> {
+        let result = &game
+            .random_reasonable_move_for_each_snake(&mut rand::thread_rng())
+            .filter(|data| data.0 == game.you.id)
+            .map(|res| res.1.to_string())
+            .collect::<Vec<String>>()[0];
+        return Box::from(result.clone());
     }
     fn end(&self, _g: &Game) {
         println!("ENDED RANDOSNAKE")

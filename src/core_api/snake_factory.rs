@@ -1,6 +1,7 @@
 use battlesnake_game_types::wire_representation::Game;
 
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
 mod randoSnake;
 #[derive(Serialize, Deserialize, Debug)]
@@ -31,7 +32,7 @@ pub trait Snake {
     fn info(&self) -> AboutMe;
     fn start(&self, g: &Game);
     fn end(&self, g: &Game);
-    fn get_move(&self, g: &Game) -> String;
+    fn get_move(&self, g: &Game) -> Box<String>;
 }
 
 pub fn get_random_snake() -> Box<impl Snake> {
