@@ -13,6 +13,7 @@ classDiagram
     SnakeFactory --> Snake
     Snake: Move()
     MinimaxSnake --|> Snake
+    RandoSnake --|> Snake
     MinimaxSnake --> Evaluator
     Evaluator: evaluate(gameState)
     MinimaxSnake --> Simulator
