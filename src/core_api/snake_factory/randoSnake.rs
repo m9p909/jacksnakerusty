@@ -6,7 +6,9 @@ pub struct RandoSnake {}
 
 impl Snake for RandoSnake {
     fn info(&self) -> AboutMe {
-        get_default_aboutme()
+        let mut default = get_default_aboutme();
+        default.color = Option::from(String::from("#123"));
+        default
     }
     fn start(&self, _game: &Game) {
         println!("STARTED RANDOSNAKE");
