@@ -10,12 +10,11 @@
 // To get you started we've included code to prevent your Battlesnake from moving backwards.
 // For more info see docs.battlesnake.com
 
+use battlesnake_game_types::wire_representation::{BattleSnake, Board, Game};
 use log::info;
 use rand::seq::SliceRandom;
 use serde_json::{json, Value};
 use std::collections::HashMap;
-
-use crate::{Battlesnake, Board, Game};
 
 // info is called when you create your Battlesnake on play.battlesnake.com
 // and controls your Battlesnake's appearance
@@ -33,20 +32,19 @@ pub fn info() -> Value {
 }
 
 // start is called when your Battlesnake begins a game
-pub fn start(_game: &Game, _turn: &u32, _board: &Board, _you: &Battlesnake) {
+pub fn start(_game: &Game, _turn: &u32, _board: &Board, _you: &BattleSnake) {
     info!("GAME START");
 }
 
 // end is called when your Battlesnake finishes a game
-pub fn end(_game: &Game, _turn: &u32, _board: &Board, _you: &Battlesnake) {
+pub fn end(_game: &Game, _turn: &u32, _board: &Board, _you: &BattleSnake) {
     info!("GAME OVER");
 }
 
 // move is called on every turn and returns your next move
 // Valid moves are "up", "down", "left", or "right"
 // See https://docs.battlesnake.com/api/example-move for available data
-pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> Value {
-    
+pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &BattleSnake) -> Value {
     let mut is_move_safe: HashMap<_, _> = vec![
         ("up", true),
         ("down", true),
@@ -59,17 +57,18 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     // We've included code to prevent your Battlesnake from moving backwards
     let my_head = &you.body[0]; // Coordinates of your head
     let my_neck = &you.body[1]; // Coordinates of your "neck"
-    
-    if my_neck.x < my_head.x { // Neck is left of head, don't move left
+
+    if my_neck.x < my_head.x {
+        // Neck is left of head, don't move left
         is_move_safe.insert("left", false);
-
-    } else if my_neck.x > my_head.x { // Neck is right of head, don't move right
+    } else if my_neck.x > my_head.x {
+        // Neck is right of head, don't move right
         is_move_safe.insert("right", false);
-
-    } else if my_neck.y < my_head.y { // Neck is below head, don't move down
+    } else if my_neck.y < my_head.y {
+        // Neck is below head, don't move down
         is_move_safe.insert("down", false);
-    
-    } else if my_neck.y > my_head.y { // Neck is above head, don't move up
+    } else if my_neck.y > my_head.y {
+        // Neck is above head, don't move up
         is_move_safe.insert("up", false);
     }
 
@@ -89,7 +88,7 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
         .filter(|&(_, v)| v)
         .map(|(k, _)| k)
         .collect::<Vec<_>>();
-    
+
     // Choose a random move from the safe ones
     let chosen = safe_moves.choose(&mut rand::thread_rng()).unwrap();
 

@@ -1,95 +1,36 @@
 #[macro_use]
 extern crate rocket;
 
+use battlesnake_game_types::wire_representation::Game;
 use log::info;
 use rocket::fairing::AdHoc;
 use rocket::http::Status;
 use rocket::serde::{json::Json, Deserialize};
-use serde::Serialize;
-use serde_json::{Value};
+use serde_json::Value;
 use std::collections::HashMap;
 use std::env;
 
-mod logic;
-
-// API and Response Objects
-// See https://docs.battlesnake.com/api
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Game {
-    id: String,
-    ruleset: HashMap<String, Value>,
-    timeout: u32,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Board {
-    height: u32,
-    width: u32,
-    food: Vec<Coord>,
-    snakes: Vec<Battlesnake>,
-    hazards: Vec<Coord>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Battlesnake {
-    id: String,
-    name: String,
-    health: u32,
-    body: Vec<Coord>,
-    head: Coord,
-    length: u32,
-    latency: String,
-    shout: Option<String>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Coord {
-    x: u32,
-    y: u32,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GameState {
-    game: Game,
-    turn: u32,
-    board: Board,
-    you: Battlesnake,
-}
+mod core_api;
 
 #[get("/")]
 fn handle_index() -> Json<Value> {
-    Json(logic::info())
+    return Json(core_api::index());
 }
 
 #[post("/start", format = "json", data = "<start_req>")]
-fn handle_start(start_req: Json<GameState>) -> Status {
-    logic::start(
-        &start_req.game,
-        &start_req.turn,
-        &start_req.board,
-        &start_req.you,
-    );
-
+fn handle_start(start_req: Json<Game>) -> Status {
+    core_api::start(&start_req.into_inner());
     Status::Ok
 }
 
 #[post("/move", format = "json", data = "<move_req>")]
-fn handle_move(move_req: Json<GameState>) -> Json<Value> {
-    let response = logic::get_move(
-        &move_req.game,
-        &move_req.turn,
-        &move_req.board,
-        &move_req.you,
-    );
-
-    Json(response)
+fn handle_move(move_req: Json<Game>) -> Json<Value> {
+    Json(core_api::get_move(&move_req.into_inner()))
 }
 
 #[post("/end", format = "json", data = "<end_req>")]
-fn handle_end(end_req: Json<GameState>) -> Status {
-    logic::end(&end_req.game, &end_req.turn, &end_req.board, &end_req.you);
-
+fn handle_end(end_req: Json<Game>) -> Status {
+    core_api::end(&end_req.into_inner());
     Status::Ok
 }
 
